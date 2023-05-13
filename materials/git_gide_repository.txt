@@ -6,4 +6,4 @@ git remote origin <ссылка>
 git push origin master
 
 Команда git remote позволяет создавать, просматривать и удалять подключения к другим репозиториям.
-git remote add <имя подключения> <url> 
+git remote add <имя подключения> <url>
