@@ -1,0 +1,9 @@
+git init - эта команда создаёт в текущей папке папку ".git".
+git add . 
+git commit -m 'comment'
+gh repo create - создание удаленного репозитория (т.е. на GitHub)
+git remote origin <ссылка>
+git push origin master
+
+Команда git remote позволяет создавать, просматривать и удалять подключения к другим репозиториям.
+git remote add <имя подключения> <url> 
