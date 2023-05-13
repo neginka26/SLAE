@@ -1,0 +1,5 @@
+gcc -Wall -Werror -Wextra main.c - компиляция
+valgrind --tool=memcheck ./a.out - аналог leaks на линукс
+cppcheck --enable=all --suppress=missingIncludeSystem main.c - доп. проверка
+clang-format -n main.c - проверка формата
+clang-format -i main.c - исправление формата
