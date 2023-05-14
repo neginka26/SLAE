@@ -7,26 +7,38 @@ void output_matrix(float **matrix, int m, int n);
 void free_matrix(float **matrix, int m);
 void hilbert_matrix_5_order(float **hilbert_matrix);
 void right_part(float **right_part);
-void gaussian_elimination_method(float **left_matrix, float **right_matrix,
-                                 int columns, int lines);
+float find_determ_of_matrix(float** matrix, int dim);
+void remove_line_and_column(float** matrix, int dim, float** result_matrix, int line, int column);
+int check_for_triangular_matrix(float** matrix, int dim);
+
 
 int main() {
   int m = 5; // количество строк
   int c = 1; // количество столбцов
+  int n = 3;
   // выделяем память под матрицы
   float **hilb_matrix = create_matrix(m, m);
   float **right_part_matrix = create_matrix(m, c);
+    float **matrix = create_matrix(n, n);
   // заполняем матрицы гильберта и правую часть
   hilbert_matrix_5_order(hilb_matrix);
   right_part(right_part_matrix);
+  fill_matrix(matrix, n, n);
   //вывод матриц
   printf("Матрица Гильберта 5 порядка:\n");
   output_matrix(hilb_matrix, m, m);
   printf("\nПравая часть:\n");
   output_matrix(right_part_matrix, m, c);
+  printf("\nМатрица 3 на 3:\n");
+  output_matrix(matrix, n, n);
+  // детерминант (определитель)
+  float determ = 0;
+  determ = find_determ_of_matrix(matrix, n);
+  printf("\nОпределитель: \n%.16f\n", determ);
   // освобождение памяти
   free_matrix(hilb_matrix, m);
   free_matrix(right_part_matrix, m);
+  free_matrix(matrix, n);
   return 0;
 }
 
@@ -93,5 +105,43 @@ void right_part(float **right_part) {
   }
 }
 
-void gaussian_elimination_method(float **left_matrix, float **right_matrix,
-                                 int columns, int lines) {}
+float find_determ_of_matrix(float** matrix, int dim) {
+    float determinant = 0;
+    int i = 0;
+    int sign = 1;
+    int tmp_dim = dim - 1;
+    if (dim < 1) printf("Ошибка: размерность матрицы < 1");
+    else if (dim == 1) {
+        determinant = matrix[0][0];
+    } else if (dim == 2) {
+        determinant = matrix[0][0]*matrix[1][1] - (matrix[0][1]*matrix[1][0]);
+    } else if (dim > 2) {
+        for (int j = 0; j < dim; j++) {
+            float** tmp_matrix = create_matrix(tmp_dim, tmp_dim);    
+            remove_line_and_column(matrix, dim, tmp_matrix, i, j);
+            determinant += sign * matrix[i][j] * find_determ_of_matrix(tmp_matrix, tmp_dim);
+            sign *= -1;
+            free_matrix(tmp_matrix, tmp_dim);
+        }
+    }
+    return determinant;
+}
+
+void remove_line_and_column(float** matrix, int dim, float** result_matrix, int line, int column) {
+    int line_counter = 0;
+    int column_counter = 0;
+    for (int i = 0; i < dim; i++) {
+        column_counter = 0;
+        if (i != line) {
+            for (int j = 0; j < dim; j++) {
+                if (j != column) {
+                    result_matrix[line_counter][column_counter] = matrix[i][j];
+                    column_counter++;                    
+                }
+            }
+            line_counter++;
+        }
+    }
+}
+
+
