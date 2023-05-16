@@ -14,39 +14,18 @@ int check_for_triangular_matrix(float determ);
 void lead_to_triangular(float **matrix, int dim);
 
 int main() {
-  int m = 5; // количество строк
-  int c = 1; // количество столбцов
-  // int n = 3;
-  //  выделяем память под матрицы
-  float **hilb_matrix = create_matrix(m, m);
-  float **right_part_matrix = create_matrix(m, c);
-  // float **matrix = create_matrix(n, n);
-  //  заполняем матрицы гильберта и правую часть
-  hilbert_matrix_5_order(hilb_matrix);
-  right_part(right_part_matrix);
-  // fill_matrix(matrix, n, n);
-  //вывод матриц
-  printf("Матрица Гильберта 5 порядка:\n");
-  output_matrix(hilb_matrix, m, m);
-  printf("\nПравая часть:\n");
-  output_matrix(right_part_matrix, m, c);
-  // printf("\nМатрица 3 на 3:\n");
-  // output_matrix(matrix, n, n);
-  //  детерминант (определитель)
-  float determ = 0;
-  determ = find_determ_of_matrix(hilb_matrix, m);
-  printf("\nОпределитель: \n%.20f\n", determ);
-  if (check_for_triangular_matrix(determ)) {
-    printf("\nМатрица может быть приведена к треугольному виду\n");
-    lead_to_triangular(hilb_matrix, m);
-    output_matrix(hilb_matrix, m, m);
-  } else {
-    printf("Матрица не может быть треугольной\n");
-  }
-  // освобождение памяти
-  free_matrix(hilb_matrix, m);
-  free_matrix(right_part_matrix, m);
-  // free_matrix(matrix, n);
+  int dimension = 3;
+    // выделение памяти под матрицу
+    float** matrix = create_matrix(dimension, dimension);
+    // заполнение матрицы
+    fill_matrix(matrix, dimension, dimension);
+    // проверка: матрица вырожденная (определитель = 0)?
+    if (check_for_triangular_matrix(find_determ_of_matrix(matrix, dimension))) {
+        lead_to_triangular(matrix, dimension);
+        output_matrix(matrix, dimension, dimension);
+    } else {
+        printf("Матрица невырожденная");
+    }
   return 0;
 }
 
@@ -167,11 +146,13 @@ int check_for_triangular_matrix(float determ) {
 void lead_to_triangular(float **matrix, int dim) {
   float r = 0;
   for (int k = 0; k < dim; k++) {
-    for (int j = k + 1; j < dim; j++) {
-      r = matrix[j][k] / matrix[k][k];
-      for (int i = k; i < dim; i++) {
-        matrix[j][i] = matrix[j][i] - r * matrix[k][i];
+    for (int i = k + 1; i < dim; i++) {
+      r = matrix[i][k] / matrix[k][k];
+      for (int j = k; j < dim; j++) {
+        matrix[i][j] = matrix[i][j] - r * matrix[k][j];
       }
     }
   }
 }
+
+// минусы: нет проверки деления на нуль в момент приведения к треугольному виду (при подборе коэффициента r не учитывается, что текущим элементом может быть нуль). Для случая с нулем нужно предусмотреть функцию смены строк местами.
