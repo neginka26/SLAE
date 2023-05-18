@@ -15,17 +15,17 @@ void lead_to_triangular(float **matrix, int dim);
 
 int main() {
   int dimension = 3;
-    // выделение памяти под матрицу
-    float** matrix = create_matrix(dimension, dimension);
-    // заполнение матрицы
-    fill_matrix(matrix, dimension, dimension);
-    // проверка: матрица вырожденная (определитель = 0)?
-    if (check_for_triangular_matrix(find_determ_of_matrix(matrix, dimension))) {
-        lead_to_triangular(matrix, dimension);
-        output_matrix(matrix, dimension, dimension);
-    } else {
-        printf("Матрица невырожденная");
-    }
+  // выделение памяти под матрицу
+  float **matrix = create_matrix(dimension, dimension);
+  // заполнение матрицы
+  fill_matrix(matrix, dimension, dimension);
+  // проверка: матрица вырожденная (определитель = 0)?
+  if (check_for_triangular_matrix(find_determ_of_matrix(matrix, dimension))) {
+    lead_to_triangular(matrix, dimension);
+    output_matrix(matrix, dimension, dimension);
+  } else {
+    printf("Матрица невырожденная");
+  }
   return 0;
 }
 
@@ -92,6 +92,7 @@ void right_part(float **right_part) {
   }
 }
 
+// нахождение определителя матрицы рекурсивным методом
 float find_determ_of_matrix(float **matrix, int dim) {
   float determinant = 0;
   int i = 0;
@@ -116,6 +117,7 @@ float find_determ_of_matrix(float **matrix, int dim) {
   return determinant;
 }
 
+// удаление одной линии и одной колонки
 void remove_line_and_column(float **matrix, int dim, float **result_matrix,
                             int line, int column) {
   int line_counter = 0;
@@ -134,6 +136,7 @@ void remove_line_and_column(float **matrix, int dim, float **result_matrix,
   }
 }
 
+//проверка на возможность приведения матрицы к треугольному виду
 int check_for_triangular_matrix(float determ) {
   int is_triang = 0;
   if (determ == 0)
@@ -143,6 +146,7 @@ int check_for_triangular_matrix(float determ) {
   return is_triang;
 }
 
+// приведение к треугольному виду (метод Гаусса)
 void lead_to_triangular(float **matrix, int dim) {
   float r = 0;
   for (int k = 0; k < dim; k++) {
@@ -155,4 +159,6 @@ void lead_to_triangular(float **matrix, int dim) {
   }
 }
 
-// минусы: нет проверки деления на нуль в момент приведения к треугольному виду (при подборе коэффициента r не учитывается, что текущим элементом может быть нуль). Для случая с нулем нужно предусмотреть функцию смены строк местами.
+// минусы: нет проверки деления на нуль в момент приведения к треугольному виду
+// (при подборе коэффициента r не учитывается, что текущим элементом может быть
+// нуль). Для случая с нулем нужно предусмотреть функцию смены строк местами.
