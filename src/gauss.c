@@ -15,21 +15,38 @@ float* reverse_motion(float **matrix, int dim, int dim_1);
 
 void output_array(float *array, int dim);
 
+void hilbert_matrix_5_order(float **hilbert_matrix);
+
+void direct_move_with_choise_main_el(float **matrix, int dim, int dim_1);
+
 int main() {
   int dim = 3;
+  float *x = NULL;
   float **matrix = create_matrix(dim, dim + 1);
-  fill_matrix(matrix, dim, dim + 1);
-  printf("Введена матрица:\n");
+  // hilbert_matrix_5_order(matrix);
+  fill_matrix(matrix, dim, dim+1);
+  printf("\nВведена СЛАУ:\n");
   output_matrix_with_right_part(matrix, dim, dim + 1);
   float determ = find_determ_of_matrix(matrix, dim);
-  printf("Определитель:\n%f\n", determ);
+  printf("\nОпределитель:\n%f\n", determ);
 
   if (check_for_triangular_matrix(find_determ_of_matrix(matrix, dim))) {
     lead_to_triangular(matrix, dim, dim + 1);
+    printf("\nТреугольный вид матрицы:\n");
     output_matrix_with_right_part(matrix, dim, dim + 1);
     float *x = reverse_motion(matrix, dim, dim+1);
+    printf("\nРешение системы:\n");
+    output_array(x, dim);
+    
+    // printf("\nВыборка по главному элементу матрицы:\n");
+    // direct_move_with_choise_main_el(matrix, dim, dim+1);
+    // output_matrix_with_right_part(matrix, dim, dim+1);
+    // float *x = reverse_motion(matrix, dim, dim+1);
+    // printf("\nРешение системы:\n");
+    // output_array(x, dim);
+
   } else {
-    printf("Матрица невырожденная");
+    printf("\nМатрица невырожденная\n");
   }
   free_matrix(matrix, dim);
   return 0;
@@ -167,4 +184,63 @@ void output_array(float *array, int dim) {
         if (i < dim - 1) printf("%f ", array[i]);
         else printf("%f\n", array[i]);
     }
+}
+
+// Заполнение матрицы как матрица Гильберта 5 порядка
+void hilbert_matrix_5_order(float **hilbert_matrix) {
+  int dim = 5;
+  for (int i = 0; i < dim; i++) {
+    for (int j = 0; j < dim+1; j++) {
+      if (j == dim)  hilbert_matrix[i][j] = i+1;
+      else hilbert_matrix[i][j] = 1.0 / ((i + 1) + (j + 1) - 1);
+    }
+  }
+}
+
+// прямая проходка с выбором главного элемента по всей матрицы
+void direct_move_with_choise_main_el(float **matrix, int dim, int dim_1) {
+  int i_max = 0;
+  int j_max = 0;
+  float max_el = 0;
+  float r = 0;
+  float *tmp_line = NULL;
+  float tmp_el = 0;
+
+
+  for (int k = 0; k < dim; k++) {
+    // нахождение максимума (по модулю) матрицы
+    max_el = 0;
+    for (int i = k; i < dim; i++) {
+      for (int j = k; j < dim; j++) {
+        if (abs(matrix[i][j]) > max_el) {
+          max_el = abs(matrix[i][j]);
+          i_max = i;
+          j_max = j;
+        }
+      }
+    }
+
+    // swap строки
+    tmp_line = matrix[k];
+    matrix[k] = matrix[i_max];
+    matrix[i_max] = tmp_line;
+
+    // swap столбца
+    for (int i = k; i < dim; i++) {
+      tmp_el = matrix[i][k];
+      matrix[i][k] = matrix[i][j_max];
+      matrix[i][j_max] = tmp_el;
+    }
+
+    // исключение столбцов (зануление)
+    for (int i = k+1; i < dim; i++) {
+      r = matrix[i][k]/matrix[k][k];
+      for (int j = k; j < dim_1; j++) {
+        matrix[i][j] -= matrix[k][j] * r;
+      }
+    }
+
+    i_max = 0;
+    j_max = 0;
+  }
 }
