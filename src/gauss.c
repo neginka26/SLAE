@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 float **create_matrix(int m, int n);
 void fill_matrix(float **matrix, int m, int n);
@@ -20,30 +21,31 @@ void hilbert_matrix_5_order(float **hilbert_matrix);
 void direct_move_with_choise_main_el(float **matrix, int dim, int dim_1);
 
 int main() {
-  int dim = 3;
+  // int dim = 3;
+  int dim = 5;
   float *x = NULL;
   float **matrix = create_matrix(dim, dim + 1);
-  // hilbert_matrix_5_order(matrix);
-  fill_matrix(matrix, dim, dim+1);
+  hilbert_matrix_5_order(matrix);
+  // fill_matrix(matrix, dim, dim+1);
   printf("\nВведена СЛАУ:\n");
   output_matrix_with_right_part(matrix, dim, dim + 1);
   float determ = find_determ_of_matrix(matrix, dim);
-  printf("\nОпределитель:\n%f\n", determ);
+  printf("\nОпределитель:\n%0.20f\n", determ);
 
   if (check_for_triangular_matrix(find_determ_of_matrix(matrix, dim))) {
-    lead_to_triangular(matrix, dim, dim + 1);
-    printf("\nТреугольный вид матрицы:\n");
-    output_matrix_with_right_part(matrix, dim, dim + 1);
-    float *x = reverse_motion(matrix, dim, dim+1);
-    printf("\nРешение системы:\n");
-    output_array(x, dim);
-    
-    // printf("\nВыборка по главному элементу матрицы:\n");
-    // direct_move_with_choise_main_el(matrix, dim, dim+1);
-    // output_matrix_with_right_part(matrix, dim, dim+1);
+    // lead_to_triangular(matrix, dim, dim + 1);
+    // printf("\nТреугольный вид матрицы:\n");
+    // output_matrix_with_right_part(matrix, dim, dim + 1);
     // float *x = reverse_motion(matrix, dim, dim+1);
     // printf("\nРешение системы:\n");
     // output_array(x, dim);
+    
+    printf("\nВыборка по главному элементу матрицы:\n");
+    direct_move_with_choise_main_el(matrix, dim, dim+1);
+    output_matrix_with_right_part(matrix, dim, dim+1);
+    float *x = reverse_motion(matrix, dim, dim+1);
+    printf("\nРешение системы:\n");
+    output_array(x, dim);
 
   } else {
     printf("\nМатрица невырожденная\n");
@@ -212,13 +214,15 @@ void direct_move_with_choise_main_el(float **matrix, int dim, int dim_1) {
     max_el = 0;
     for (int i = k; i < dim; i++) {
       for (int j = k; j < dim; j++) {
-        if (abs(matrix[i][j]) > max_el) {
-          max_el = abs(matrix[i][j]);
+        if (fabs(matrix[i][j]) > max_el) {
+          max_el = fabs(matrix[i][j]);
           i_max = i;
           j_max = j;
         }
       }
     }
+
+    
 
     // swap строки
     tmp_line = matrix[k];
