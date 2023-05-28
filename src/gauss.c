@@ -7,7 +7,7 @@ void fill_matrix(float **matrix, int m, int n);
 void output_matrix_with_right_part(float **matrix, int m, int n);
 void free_matrix(float **matrix, int m);
 
-float find_determ_of_matrix(float **matrix, int dim);
+num find_determ_of_matrix(num **matrix, int dim);
 void remove_line_and_column(float **matrix, int dim, float **result_matrix,
                             int line, int column);
 int check_for_triangular_matrix(float determ);
@@ -102,7 +102,7 @@ void free_matrix(float **matrix, int m) {
 }
 
 // нахождение определителя матрицы рекурсивным методом
-float find_determ_of_matrix(float **matrix, int dim) {
+float find_determ_of_matrix(num **matrix, int dim) {
   float determinant = 0;
   int i = 0;
   int sign = 1;
@@ -251,3 +251,4 @@ void direct_move_with_choise_main_el(float **matrix, int dim, int dim_1) {
     j_max = 0;
   }
 }
+
