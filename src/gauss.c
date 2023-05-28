@@ -20,6 +20,11 @@ void hilbert_matrix_5_order(float **hilbert_matrix);
 
 void direct_move_with_choise_main_el(float **matrix, int dim, int dim_1);
 
+typedef struct Num {
+  int numerator;
+  int denominator;
+} num;
+
 int main() {
   // int dim = 3;
   int dim = 5;
@@ -221,8 +226,6 @@ void direct_move_with_choise_main_el(float **matrix, int dim, int dim_1) {
         }
       }
     }
-
-    
 
     // swap строки
     tmp_line = matrix[k];
