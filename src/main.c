@@ -44,17 +44,21 @@ int main() {
   lead_to_triangular(matrix, dim, dim+1);
   printf("\nТреугольная матрица:\n");
   output_matrix_with_right_part(matrix, dim, dim+1);
+  output_matrix_fractions(matrix, dim, dim + 1);
 
   determ = find_determ_of_matrix(matrix, dim);
   printf("\nОпределитель: %lld/%lld\n", determ.numerator, determ.denominator);
+
+  x = reverse_motion(matrix, dim, dim + 1);
+    printf("Решение:\n");
+    output_array(x, dim);
 
   if (get_float_num(determ) != 0) {
     printf("\nМетод Гаусса с выбором главного элемента:\n");
     direct_move_with_choise_main_el(matrix_1, dim, dim + 1);
     output_matrix_with_right_part(matrix_1, dim, dim + 1);
     output_matrix_fractions(matrix_1, dim, dim + 1);
-    determ = find_determ_of_matrix(matrix_1, dim);
-    printf("\nОпределитель: %lld/%lld\n", determ.numerator, determ.denominator);
+
     x = reverse_motion(matrix_1, dim, dim + 1);
     printf("Решение:\n");
     output_array(x, dim);
@@ -279,19 +283,18 @@ void output_matrix_fractions(num **matrix, int m, int n) {
 }
 
 num* reverse_motion(num **matrix, int dim, int dim_1) {
-  num *answers = (num*)malloc(dim*sizeof(num));
-  int ind = dim_1 - 1;
   num x = {0, 1};
-  int diag_ind = dim - 1;
+  int right_part_ind = dim_1 - 1;
+  num *answers = (num*)malloc(dim * sizeof(num)); 
   for (int i = dim - 1; i >= 0; i--) {
-    x = matrix[i][ind];
+    x = matrix[i][right_part_ind];
     for (int j = dim - 1; j > i; j--) {
-      x = difference_fractions(x, product_fractions(matrix[i][j], answers[i+1]));
+      x = difference_fractions(x, product_fractions(matrix[i][j], answers[j]));
       x = shorten_fraction(x);
     }
-    answers[i] = division_fractions(x, matrix[i][diag_ind]);
-    answers[i] = shorten_fraction(answers[i]);
-    diag_ind--;
+    x = division_fractions(x, matrix[i][i]);
+    x = shorten_fraction(x);
+    answers[i] = x;
   }
   return answers;
 }
