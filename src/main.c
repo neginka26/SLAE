@@ -50,8 +50,8 @@ int main() {
   printf("\nОпределитель: %lld/%lld\n", determ.numerator, determ.denominator);
 
   x = reverse_motion(matrix, dim, dim + 1);
-    printf("Решение:\n");
-    output_array(x, dim);
+  printf("Решение:\n");
+  output_array(x, dim);
 
   if (get_float_num(determ) != 0) {
     printf("\nМетод Гаусса с выбором главного элемента:\n");
@@ -59,9 +59,9 @@ int main() {
     output_matrix_with_right_part(matrix_1, dim, dim + 1);
     output_matrix_fractions(matrix_1, dim, dim + 1);
 
-    x = reverse_motion(matrix_1, dim, dim + 1);
-    printf("Решение:\n");
-    output_array(x, dim);
+    // x = reverse_motion(matrix_1, dim, dim + 1);
+    // printf("Решение:\n");
+    // output_array(x, dim);
   } else {
     printf("Матрица невырожденная\n");
   }
@@ -227,6 +227,11 @@ void direct_move_with_choise_main_el(num **matrix, int dim, int dim_1) {
   num tmp_el = {0, 1};
   num r = {0, 1};
 
+  if (dim != 1) {
+
+  }
+  
+
   for (int k = 0; k < dim; k++) {
     // найти макисимум
     max_el = 0;
@@ -240,28 +245,42 @@ void direct_move_with_choise_main_el(num **matrix, int dim, int dim_1) {
       }
     }
 
+    printf("max el = %lld/%lld\n", matrix[i_max][j_max].numerator, matrix[i_max][j_max].denominator);
+
     // swap строк
     tmp_line = matrix[k];
     matrix[k] = matrix[i_max];
     matrix[i_max] = tmp_line;
 
-    // swap столбца
-    for (int i = k; i < dim; i++) {
-      tmp_el = matrix[i][k];
-      matrix[i][k] = matrix[i][j_max];
-      matrix[i][j_max] = tmp_el;
+    // printf("After swap\n");
+    // output_matrix_fractions(matrix, dim, dim_1);
+
+    r = matrix[k][j_max];
+    for (int j = 0; j < dim_1; j++) {
+      matrix[k][j] = division_fractions(matrix[k][j], r);
+      matrix[k][j] = shorten_fraction(matrix[k][j]);
     }
 
+    printf("Матрица после деления главной строки\n");
+    output_matrix_fractions(matrix, dim, dim_1);
     // зануление
-    for (int i = k + 1; i < dim; i++) {
-      r = division_fractions(matrix[i][k], matrix[k][k]); // matrix[i][k] / matrix[k][k]
-      r = shorten_fraction(r);
-      for (int j = k; j < dim_1; j++) {
-        matrix[i][j] = difference_fractions(matrix[i][j], product_fractions(r, matrix[k][j]));  //matrix[i][j] - r * matrix[k][j];
-        matrix[i][j] = shorten_fraction(matrix[i][j]);
-      }
+    for (int i = 0; i < dim; i++) {
+      if (i != k) {
+        r = division_fractions(matrix[i][j_max], matrix[k][j_max]);
+        r = shorten_fraction(r);
+        for (int j = 0; j < dim_1; j++) {
+          matrix[i][j] = difference_fractions(matrix[i][j], product_fractions(r, matrix[k][j]));
+          matrix[i][j] = shorten_fraction(matrix[i][j]);
+        }
+      } 
     }
+    printf("Матрица после зануления\n");
+    output_matrix_fractions(matrix, dim, dim_1);
 
+    tmp_line = matrix[j_max];
+    matrix[j_max] = matrix[k];
+    matrix[k] = tmp_line;
+    //нужно вести игнор лист главных строк и столбцов
     i_max = 0;
     j_max = 0;
   }
