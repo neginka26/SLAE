@@ -22,10 +22,6 @@ num division_fractions(num n_1, num n_2);
 num product_fractions(num n_1, num n_2);
 num sum_fractions(num n_1, num n_2);
 num difference_fractions(num n_1, num n_2);
-num shorten_fraction(num n);
-
-
-void new_output_matrix(num **matrix, int dim, int dim_1);
 
 long long find_greatest_common_divisor(num n);
 num shorten_fraction(num n);
@@ -151,7 +147,6 @@ num division_fractions(num n_1, num n_2) {
   num res = {0, 1};
   res.numerator = n_1.numerator * n_2.denominator;
   res.denominator = n_1.denominator * n_2.numerator;
-  res = shorten_fraction(res);
   return res;
 }
 
@@ -159,7 +154,6 @@ num product_fractions(num n_1, num n_2) {
   num res = {0, 1};
   res.numerator = n_1.numerator * n_2.numerator;
   res.denominator = n_1.denominator * n_2.denominator;
-  res = shorten_fraction(res);
   return res;
 }
 
@@ -177,7 +171,6 @@ num sum_fractions(num n_1, num n_2) {
     res.numerator = n_1.numerator + n_2.numerator;
     res.denominator = n_1.denominator;
   }
-  res = shorten_fraction(res);
   return res;
 }
 
@@ -195,16 +188,7 @@ num difference_fractions(num n_1, num n_2) {
     res.numerator = n_1.numerator - n_2.numerator;
     res.denominator = n_1.denominator;
   }
-  res = shorten_fraction(res);
   return res;
-}
-
-void new_output_matrix(num **matrix, int dim, int dim_1) {
-  for (int i = 0; i < dim; i++) {
-    for (int j = 0; j < dim_1; j++) {
-      printf("Строка №%d: числитель - %d, знаменатель - %d\n", i, matrix[i][j].numerator, matrix[i][j].denominator);
-    }
-  }
 }
 
 long long find_greatest_common_divisor(num n) {
