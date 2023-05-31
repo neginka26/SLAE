@@ -16,6 +16,13 @@ void lead_to_triangular(num **matrix, int dim, int dim_1);
 num find_determ_of_matrix(num **matrix, int dim);
 void direct_move_with_choise_main_el(num **matrix, int dim, int dim_1);
 num* reverse_motion(num **matrix, int dim, int dim_1);
+void find_ind_max_el(num **matrix, int dim, int *i_max, int *j_max, int *lines_ignore, int *columns_ignore);
+void rationing(num **matrix, int dim, int dim_1, int i_max, int j_max, int *columns_ignore);
+void to_zero(num **matrix, int dim, int dim_1, int i_max, int j_max, int *lines_ignore, int *columns_ignore);
+int count_zero_in_column(num **matrix, int dim, int column);
+int count_zero_in_line(num **matrix, int dim, int line);
+void swap_columns(num **matrix, int dim, int col_1, int col_2);
+void swap_lines(num **matrix, int dim, int line_1, int line_2);
 
 float get_float_num(num n);
 num division_fractions(num n_1, num n_2);
@@ -59,9 +66,9 @@ int main() {
     output_matrix_with_right_part(matrix_1, dim, dim + 1);
     output_matrix_fractions(matrix_1, dim, dim + 1);
 
-    // x = reverse_motion(matrix_1, dim, dim + 1);
-    // printf("Решение:\n");
-    // output_array(x, dim);
+    x = reverse_motion(matrix_1, dim, dim + 1);
+    printf("Решение:\n");
+    output_array(x, dim);
   } else {
     printf("Матрица невырожденная\n");
   }
@@ -220,70 +227,41 @@ num find_determ_of_matrix(num **matrix, int dim) {
 }
 
 void direct_move_with_choise_main_el(num **matrix, int dim, int dim_1) {
-  float max_el = 0;
   int i_max = 0;
   int j_max = 0;
-  num *tmp_line = NULL;
-  num tmp_el = {0, 1};
-  num r = {0, 1};
+  int *lines_ignore = (int*)malloc(dim * sizeof(int));
+  int *columns_ignore = (int*)malloc(dim * sizeof(int));
+  int count_zero = 0;
+  int ind = 0;
 
-  if (dim != 1) {
-
+  for (int i = 0; i < dim; i++) {
+    lines_ignore[i] = -1;
+    columns_ignore[i] = -1;
   }
-  
-
-  for (int k = 0; k < dim; k++) {
-    // найти макисимум
-    max_el = 0;
-    for (int i = k; i < dim; i++) {
-      for (int j = k; j < dim; j++) {
-        if (fabs(get_float_num(matrix[i][j])) > max_el) {
-          max_el = get_float_num(matrix[i][j]);
-          i_max = i;
-          j_max = j;
-        }
-      }
-    }
-
-    printf("max el = %lld/%lld\n", matrix[i_max][j_max].numerator, matrix[i_max][j_max].denominator);
-
-    // swap строк
-    tmp_line = matrix[k];
-    matrix[k] = matrix[i_max];
-    matrix[i_max] = tmp_line;
-
-    // printf("After swap\n");
-    // output_matrix_fractions(matrix, dim, dim_1);
-
-    r = matrix[k][j_max];
-    for (int j = 0; j < dim_1; j++) {
-      matrix[k][j] = division_fractions(matrix[k][j], r);
-      matrix[k][j] = shorten_fraction(matrix[k][j]);
-    }
-
-    printf("Матрица после деления главной строки\n");
-    output_matrix_fractions(matrix, dim, dim_1);
-    // зануление
-    for (int i = 0; i < dim; i++) {
-      if (i != k) {
-        r = division_fractions(matrix[i][j_max], matrix[k][j_max]);
-        r = shorten_fraction(r);
-        for (int j = 0; j < dim_1; j++) {
-          matrix[i][j] = difference_fractions(matrix[i][j], product_fractions(r, matrix[k][j]));
-          matrix[i][j] = shorten_fraction(matrix[i][j]);
-        }
-      } 
-    }
-    printf("Матрица после зануления\n");
-    output_matrix_fractions(matrix, dim, dim_1);
-
-    tmp_line = matrix[j_max];
-    matrix[j_max] = matrix[k];
-    matrix[k] = tmp_line;
-    //нужно вести игнор лист главных строк и столбцов
-    i_max = 0;
-    j_max = 0;
+  int counter = 0;
+  for (int k = 0; k < dim - 1; k++) {
+    // поиск максимума
+    find_ind_max_el(matrix, dim, &i_max, &j_max, lines_ignore, columns_ignore);
+    // нормировка строки с главным элементом
+    rationing(matrix, dim, dim_1, i_max, j_max, columns_ignore);
+    // зануление столбца с главным элементом
+    to_zero(matrix, dim, dim_1, i_max, j_max, lines_ignore, columns_ignore);
+    // исключение главной строки и столбца
+    lines_ignore[counter] = i_max;
+    columns_ignore[counter] = j_max;
+    counter++;
   }
+
+  for (int i = 0; i < dim; i++) {
+    count_zero = count_zero_in_column(matrix, dim, i);
+    ind = dim - count_zero - 1;
+    swap_columns(matrix, dim, i, ind);
+  }
+
+  for (int i = 0; i < dim; i++) {
+    count_zero = count_zero_in_line(matrix, dim, i);
+    swap_lines(matrix, dim, i, count_zero);
+  }  
 }
 
 void output_matrix_fractions(num **matrix, int m, int n) {
@@ -323,4 +301,125 @@ void output_array(num *array, int dim) {
     if (i < dim - 1) printf("%lld/%lld ", array[i].numerator, array[i].denominator);
     else printf("%lld/%lld\n", array[i].numerator, array[i].denominator);
   }
+}
+
+void find_ind_max_el(num **matrix, int dim, int *i_max, int *j_max, int *lines_ignore, int *columns_ignore) {
+  num max_el = {0, 1};
+  int skip_line = 0;
+  int skip_column = 0;
+  for (int i = 0; i < dim; i++) {
+    skip_line = 0;
+    for (int k = 0; k < dim; k++) {
+      if (lines_ignore[k] == i) {
+        skip_line = 1;
+        break;
+      }
+    }
+    if (skip_line) continue;
+    else {
+      for (int j = 0; j < dim; j++) {
+        skip_column = 0;
+        for (int k = 0; k < dim; k++) {
+          if (columns_ignore[k] == j) {
+            skip_column = 1;
+            break; 
+          }
+        }
+        if (skip_column) continue;
+        else {
+          if (get_float_num(max_el) < get_float_num(matrix[i][j])) {
+            max_el = matrix[i][j];
+            *i_max = i;
+            *j_max = j;
+          }
+        }
+      }
+    }
+  }
+}
+
+void rationing(num **matrix, int dim, int dim_1, int i_max, int j_max, int *columns_ignore) {
+  int skip_column = 0;
+  num r = matrix[i_max][j_max];
+  for (int j = 0; j < dim_1; j++) {
+    skip_column = 0;
+    for (int k = 0; k < dim; k++) {
+      if (columns_ignore[k] == j) {
+        skip_column = 1;
+        break;
+      }
+    }
+    if (skip_column) continue;
+    else {
+      matrix[i_max][j] = division_fractions(matrix[i_max][j], r);
+      matrix[i_max][j] = shorten_fraction(matrix[i_max][j]);
+    }
+  }
+}
+
+void to_zero(num **matrix, int dim, int dim_1, int i_max, int j_max, int *lines_ignore, int *columns_ignore) {
+  num r = {0,1};
+  int skip_lines = 0;
+  int skip_columns = 0;
+  for (int i = 0; i < dim; i++) {
+    skip_lines = 0;
+    for (int k = 0; k < dim; k++) {
+      if (lines_ignore[k] == i) {
+        skip_lines = 1;
+        break;
+      }
+    }
+    if (skip_lines) continue;
+    else {
+      if (i != i_max) {
+        r = division_fractions(matrix[i][j_max], matrix[i_max][j_max]);
+        r = shorten_fraction(r);
+        for (int j = 0; j < dim_1; j++) {
+          skip_columns = 0;
+          for (int k = 0; k < dim; k++) {
+            if (columns_ignore[k] == j) {
+              skip_columns = 1;
+              break;
+            }
+          }
+          if (skip_columns) continue;
+          else {
+            matrix[i][j] = difference_fractions(matrix[i][j], product_fractions(matrix[i_max][j], r));
+            matrix[i][j] = shorten_fraction(matrix[i][j]);
+          }
+        }
+      }
+    } 
+  }
+}
+
+int count_zero_in_column(num **matrix, int dim, int column) {
+  int count = 0;
+  for (int i = 0; i < dim; i++) {
+    if ((get_float_num(matrix[i][column])) == 0) count++; 
+  }
+  return count;
+}
+
+void swap_columns(num **matrix, int dim, int col_1, int col_2) {
+  num tmp_el = {0, 1};
+  for (int i = 0; i < dim; i++) {
+    tmp_el = matrix[i][col_1];
+    matrix[i][col_1] = matrix[i][col_2];
+    matrix[i][col_2] = tmp_el;
+  } 
+}
+
+int count_zero_in_line(num **matrix, int dim, int line) {
+  int count = 0;
+  for (int j = 0; j < dim; j++) {
+    if ((get_float_num(matrix[line][j])) == 0) count++;
+  }
+  return count;
+}
+
+void swap_lines(num **matrix, int dim, int line_1, int line_2) {
+  num *tmp_line = matrix[line_1];
+  matrix[line_1] = matrix[line_2];
+  matrix[line_2] = tmp_line;
 }
