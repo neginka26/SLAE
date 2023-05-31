@@ -327,7 +327,7 @@ void find_ind_max_el(num **matrix, int dim, int *i_max, int *j_max, int *lines_i
         }
         if (skip_column) continue;
         else {
-          if (get_float_num(max_el) < get_float_num(matrix[i][j])) {
+          if (get_float_num(max_el) < fabs(get_float_num(matrix[i][j]))) {
             max_el = matrix[i][j];
             *i_max = i;
             *j_max = j;
